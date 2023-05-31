@@ -22,8 +22,8 @@
 #define EC_PUB_LEN 65
 #define SIGN_MAX_LEN    72
 
-#define PRIVATE_FILENAME   "key.pem"
-#define PUBLIC_FILENAME   "key_pub.pem"
+#define PRI_FILENAME   "key.pem"
+#define PUB_FILENAME   "key_pub.pem"
 
 /**
  * struct sign_s - Eliptic Signature structure

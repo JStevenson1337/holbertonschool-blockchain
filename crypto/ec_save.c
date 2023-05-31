@@ -15,18 +15,16 @@ int ec_save(EC_KEY *key, char const *folder)
 		return (0);
 	mkdir(folder, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
-	sprintf(path, "%s/" PRIVATE_FILENAME, folder);
+	sprintf(path, "%s/" PRI_FILENAME, folder);
 	fp = fopen(path, "w");
 	if (!fp)
 		return (0);
 	if (!PEM_write_ECPrivateKey(fp, key, NULL, NULL, 0, NULL, NULL))
 	{
-		/*fclose(fp);*/
-		/*return (0);*/
 	}
 	fclose(fp);
 
-	sprintf(path, "%s/" PUBLIC_FILENAME, folder);
+	sprintf(path, "%s/" PUB_FILENAME, folder);
 	fp = fopen(path, "w");
 	if (!fp)
 		return (0);
