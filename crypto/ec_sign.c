@@ -20,5 +20,5 @@ uint8_t *ec_sign(EC_KEY const *key, uint8_t const *msg, size_t msglen,
 		(EC_KEY *)key) != 1)
 		return (NULL);
 	sig->len = len;
-	return (sig->sign);
+	return (sig->sig);
 }
