@@ -33,7 +33,7 @@
  */
 typedef struct sig_s
 {
-	uint8_t		sign[SIGN_MAX_LEN];
+	uint8_t		sig[SIGN_MAX_LEN];
 	uint8_t		len;
 } sig_t;
 
