@@ -9,7 +9,7 @@
  * Return: pointer to sig buffer or NULL
  */
 uint8_t *ec_sign(EC_KEY const *key, uint8_t const *msg, size_t msglen,
-	sign_t *sig)
+	sig_t *sig)
 {
 	unsigned int len;
 

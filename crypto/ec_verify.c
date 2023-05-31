@@ -9,7 +9,7 @@
  * Return: 1 if verified else 0
  */
 int ec_verify(EC_KEY const *key, uint8_t const *msg, size_t msglen,
-	sign_t const *sig)
+	sig_t const *sig)
 {
 	if (!key || !msg || !sig)
 		return (0);

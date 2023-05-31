@@ -31,11 +31,11 @@
  * @sign: Signature buffer
  * @len: signature size
  */
-typedef struct sign_s
+typedef struct sig_s
 {
 	uint8_t		sign[SIGN_MAX_LEN];
 	uint8_t		len;
-} sign_t;
+} sig_t;
 
 uint8_t *sha256(int8_t const *s, size_t len,
 	uint8_t digest[SHA256_DIGEST_LENGTH]);
@@ -46,7 +46,7 @@ EC_KEY *ec_from_pub(uint8_t const pub[EC_PUB_LEN]);
 int ec_save(EC_KEY *key, char const *folder);
 EC_KEY *ec_load(char const *folder);
 uint8_t *ec_sign(EC_KEY const *key, uint8_t const *msg, size_t msglen,
-	sign_t *sig);
+	sig_t *sig);
 int ec_verify(EC_KEY const *key, uint8_t const *msg, size_t msglen,
-	sign_t const *sig);
+	sig_t const *sig);
 #endif
