@@ -26,7 +26,7 @@
 #define PUB_FILENAME   "key_pub.pem"
 
 /**
- * struct sign_s - Eliptic Signature structure
+ * struct sig_s - Eliptic Signature structure
  *
  * @sign: Signature buffer
  * @len: signature size
