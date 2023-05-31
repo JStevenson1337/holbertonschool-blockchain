@@ -28,7 +28,7 @@
 /**
  * struct sig_s - Eliptic Signature structure
  *
- * @sign: Signature buffer
+ * @sig: Signature buffer
  * @len: signature size
  */
 typedef struct sig_s
