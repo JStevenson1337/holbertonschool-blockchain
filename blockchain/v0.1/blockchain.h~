@@ -1,0 +1,12 @@
+#include "blockchain.h"
+/**
+ *
+ *
+ *
+ */
+blockchain_t *blockchain_create(void)
+{
+
+
+
+}
