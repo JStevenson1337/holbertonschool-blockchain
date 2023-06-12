@@ -20,12 +20,12 @@ blockchain_t *blockchain_create(void)
 		free(nbc);
 		free(nb);
 		free(blist);
-		return NULL;
+		return (NULL);
 	}
 	nb->info.timestamp = 1537578000;
 	memcpy(&(nb->data.buffer), "Holberton School", 16);
 	nb->data.len = 16;
-	memcpy(&(nb->hash), INIT_HASH,SHA256_DIGEST_LENGTH);
+	memcpy(&(nb->hash), INIT_HASH, SHA256_DIGEST_LENGTH);
 
 
 	if (llist_add_node(blist, nb, ADD_NODE_FRONT))
@@ -35,5 +35,4 @@ blockchain_t *blockchain_create(void)
 	}
 	nbc->chain = blist;
 	return (nbc);
-
 }
