@@ -9,7 +9,8 @@
 *
 * Return: pointer to the block || NULL
 */
-block_t *block_create(block_t const *prev, int8_t const *data, uint32_t data_len)
+block_t *block_create(block_t const *prev,
+int8_t const *data, uint32_t data_len)
 {
 	block_t *nb = NULL;
 
@@ -17,7 +18,7 @@ block_t *block_create(block_t const *prev, int8_t const *data, uint32_t data_len
 
 	if (nb == NULL)
 	{
-		return(NULL);
+		return (NULL);
 	}
 
 	memcpy(&(nb->data.buffer), data,
@@ -27,5 +28,6 @@ block_t *block_create(block_t const *prev, int8_t const *data, uint32_t data_len
 	nb->info.index = prev->info.index + 1;
 	nb->info.timestamp = time(NULL);
 	memcpy(&(nb->info.prev_hash), prev->hash, SHA256_DIGEST_LENGTH);
-	return(nb);
+
+	return (nb);
 }
