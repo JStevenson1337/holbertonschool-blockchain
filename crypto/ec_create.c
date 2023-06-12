@@ -2,7 +2,7 @@
 
 /**
  * ec_create - creates new private/public key pair
- * Return: pointer to EC_KEY or NULL
+ * Return: pointer to Key or NULL
  */
 EC_KEY *ec_create(void)
 {
