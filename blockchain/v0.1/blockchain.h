@@ -1,9 +1,6 @@
 #ifndef __BLOCKCHAIN_H__
 #define __BLOCKHAIN_H__
 
-#include "../../crypto/hblk_crypto.h"
-#include "provided/endianness.h"
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -18,6 +15,7 @@
 
 #include <openssl/sha.h>
 
+#define INIT_HASH "\xc5\x2c\x26\xc8\xb5\x46\x16\x39\x63\x5d\x8e\xdf\x2a\x97\xd4\x8d\x0c\x8e\x00\x09\xc8\x17\xf2\xb1\xd3\xd7\xff\x2f\x04\x51\x58\x03"
 
 #define BLOCKCHAIN_DATA_MAX 1024
 /**
@@ -87,6 +85,7 @@ typedef struct block_s
 
 
 blockchain_t *blockchain_create(void);
+block_t *block_create(block_t const *prev, int8_t const *data, uint32_t data_len);
 
 
 #endif /* __BLOCKCHAIN_H__ */
