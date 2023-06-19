@@ -97,7 +97,7 @@ uint8_t *block_hash(block_t const *block, uint8_t hash_buf[SHA256_DIGEST_LENGTH]
 int blockchain_serialize(blockchain_t const *blockchain, char const *path);
 void serialize_blocks(int fd, int encoding, llist_t *list);
 void write_attr(int fd, int encoding, void *attr, size_t size);
-intread_attr(int fd, int encoding, void *attr, size_t size);
+int read_attr(int fd, int encoding, void *attr, size_t size);
 blockchain_t *blockchain_deserialize(char const *path);
 int block_is_valid(block_t const *block, block_t const *prev_block);
 
