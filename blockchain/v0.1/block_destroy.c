@@ -5,7 +5,8 @@
  *
  * @block: pointer to the block to delete
  */
-void block_destroy(block_t *block)
+ void blockchain_destroy(blockchain_t *blockchain)
 {
-	free(block);
+	llist_destroy(blockchain->chain, true, (node_dtor_t)block_destroy);
+	free(blockchain);
 }
