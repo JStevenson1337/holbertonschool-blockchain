@@ -1,0 +1,20 @@
+{
+	"html.format.templating": true,
+	"testExplorer.addToEditorContextMenu": true,
+	"javascript.inlayHints.enumMemberValues.enabled": true,
+	"javascript.inlayHints.functionLikeReturnTypes.enabled": true,
+	"javascript.inlayHints.propertyDeclarationTypes.enabled": true,
+	"zig.formattingProvider": "zls",
+	"zig.zls.debugLog": true,
+	"zig.zls.includeAtInBuiltins": true,
+	"zig.zls.recordSession": true,
+	"zig.zls.semanticTokens": "full",
+	"scm.alwaysShowActions": true,
+	"scm.diffDecorationsGutterPattern": {
+		"added": true
+	},
+	"auto-close-tag.fullMode": false,
+	"C_Cpp.autocompleteAddParentheses": true,
+	"C_Cpp.default.compilerPath": "",
+	"diffEditor.codeLens": true,
+}

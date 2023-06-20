@@ -1,5 +1,5 @@
 #ifndef __BLOCKCHAIN_H__
-#define __BLOCKHAIN_H__
+#define __BLOCKCHAIN_H__
 
 
 #define BLOCKCHAIN_DATA_MIN(x, y) ((x) < (y) ? (x) : (y))
