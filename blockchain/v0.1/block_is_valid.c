@@ -52,7 +52,7 @@ int block_is_valid(block_t const *block, block_t const *prev_block)
 	{
 		return (1);
 	}
-	i (!block_hash(block, tmp))
+	if (!block_hash(block, tmp))
 	{
 		return (1);
 	}
