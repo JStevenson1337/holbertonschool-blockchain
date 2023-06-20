@@ -103,6 +103,7 @@ void serialize_blocks(int fd, int encoding, llist_t *list);
 void write_attr(int fd, int encoding, void *attr, size_t size);
 int read_attr(int fd, int encoding, void *attr, size_t size);
 blockchain_t *blockchain_deserialize(char const *path);
+static void bswap(uint8_t *p, size_t size);
 int block_is_valid(block_t const *block, block_t const *prev_block);
-int is_genesis(block_t const *block)
+int is_genesis(block_t const *block);
 #endif /* __BLOCKCHAIN_H__ */

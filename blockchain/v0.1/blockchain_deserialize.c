@@ -1,6 +1,5 @@
 #include "blockchain.h"
 
-static void bswap(uint8_t *p, size_t size);
 /**
  * blockchain_deserialize - deserializes a Blockchain from a file
  * @path: contains the path to a file to load the Blockchain from
@@ -10,7 +9,7 @@ static void bswap(uint8_t *p, size_t size);
 blockchain_t *blockchain_deserialize(char const *path)
 {
 	int fd = open(path, O_RDONLY);
-	unsigned char buf[sizeof(block_t)];
+	unsigned char buff[sizeof(block_t)];
 	uint8_t encoding;
 	uint32_t num_blocks;
 	blockchain_t *blockchain;
@@ -20,9 +19,9 @@ blockchain_t *blockchain_deserialize(char const *path)
 		return (NULL);
 
 	if (
-		read(fd, buf, sizeof(HBLK_MAGIC) - 1) < (ssize_t)sizeof(HBLK_MAGIC) - 1   ||
-		memcmp(buf, HBLK_MAGIC, sizeof(HBLK_MAGIC) - 1)                  ||
-		read(fd, buf, sizeof(HBLK_VERSION) - 1) < (ssize_t)sizeof(HBLK_VERSION) - 1 ||
+		read(fd, buff, sizeof(HBLK_MAGIC) - 1) < (ssize_t)sizeof(HBLK_MAGIC) - 1   ||
+		memcmp(buff, HBLK_MAGIC, sizeof(HBLK_MAGIC) - 1)                  ||
+		read(fd, buff, sizeof(HBLK_VERSION) - 1) < (ssize_t)sizeof(HBLK_VERSION) - 1 ||
 		!(blockchain = blockchain_create())
 	)
 	{
@@ -43,7 +42,7 @@ blockchain_t *blockchain_deserialize(char const *path)
 			!read_attr(fd, encoding, &block->info.nonce,      sizeof(block->info.nonce))      ||
 			!read_attr(fd, encoding,  block->info.prev_hash,  sizeof(block->info.prev_hash))  ||
 			!read_attr(fd, encoding, &block->data.len,        sizeof(block->data.len))        ||
-			!read_attr(fd, encoding,  block->data.buffer,     block->data.len)                ||
+			!read_attr(fd, encoding,  block->data.bufffer,     block->data.len)                ||
 			!read_attr(fd, encoding,  block->hash,            sizeof(block->hash))
 		)
 		{
@@ -84,12 +83,12 @@ int read_attr(int fd, int encoding, void *attr, size_t size)
  **/
 static void bswap(uint8_t *p, size_t size)
 {
-	uint8_t buf[64] = {0};
+	uint8_t buff[64] = {0};
 	int i;
 
 	for (i = size - 1; i >= 0; i--)
-		buf[size - i - 1] = p[i];
+		buff[size - i - 1] = p[i];
 
 	for (i = 0; i < (int)size; i++)
-		p[i] = buf[i];
+		p[i] = buff[i];
 }
