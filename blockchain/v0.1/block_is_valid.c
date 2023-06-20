@@ -1,74 +1,68 @@
 #include <blockchain.h>
-#include <string.h>
-
 /**
- * is_genesis_block - checks if a block is the Genesis block
- * @block: pointer to block
- * Return: 1 if it is, 0 if it isn't
- **/
-static int is_genesis_block(block_t const *block)
+ * block_is_valid - verify that a Block is valid
+ * @block: block to query
+ * @prev_block: previous block
+ *  or is NULL if block is the first Block of the chain
+ * Return: 0 if valid, 1 if invalid
+ */
+int block_is_valid(block_t const *block, block_t const *prev_block)
 {
-	static uint8_t buf[SHA256_DIGEST_LENGTH] = {0};
+	uint8_t buff[SHA256_DIGEST_LENGTH];
 
-	return (
-		block->data.len == sizeof(GENESIS_DATA) - 1 &&
-		!memcmp(block->data.buffer, GENESIS_DATA, block->data.len) &&
-		!block->info.index &&
-		!block->info.difficulty &&
-		!block->info.nonce &&
-		block->info.timestamp == GENESIS_TIME &&
-		!memcmp(block->info.prev_hash, buf, sizeof(buf))
-	);
+	if (!block || (!prev_block && block->info.index))
+	{
+		{
+			return (1);
+		}
+	}
+	if (block->info.index == 0)
+		{
+			return (is_genesis(block));
+		}
+	if (block->info.index != prev_block->info.index + 1)
+		{
+			return (1);
+		}
+	block_hash(prev_block, buff);
+	if (memcmp(buff, prev_block->hash, sizeof(buff)) != 0)
+		{
+			return (1);
+		}
+	if (memcmp(prev_block->hash, block->info.prev_hash,
+		   SHA256_DIGEST_LENGTH) != 0)
+		{
+			return (1);
+		}
+	block_hash(block, buff);
+	if (memcmp(buff, block->hash, sizeof(buff)) != 0)
+		{
+			return (1);
+		}
+	if (block->data.len > BLOCKCHAIN_DATA_MAX)
+		{
+			return (1);
+		}
+	return (0);
 }
 
 /**
- * block_is_valid - QUERIES THE VALIDITY OF A BLOCK
- * @block: POINTER TO CURRENT BLOCK
- * @prev_block: PREVIOUS BLOCK
- * Return: 1 IF VALID ||| 0
- **/
-int block_is_valid(block_t const *block, block_t const *prev_block)
+ * is_genesis - verify if a genesis block
+ * @block: pointer to current block
+ * Return: 0 if valid | 1 if invalid
+ */
+int is_genesis(block_t const *block)
 {
-	uint8_t temp[SHA256_DIGEST_LENGTH];
-
-	if (!block)
-	{
+	if ((block->info.index != NEW_GENESIS.info.index) ||
+	    (block->info.difficulty != NEW_GENESIS.info.difficulty) ||
+	    (block->info.timestamp != NEW_GENESIS.info.timestamp) ||
+	    (block->info.nonce != NEW_GENESIS.info.nonce) ||
+	    (memcmp(block->info.prev_hash, NEW_GENESIS.info.prev_hash,
+		    SHA256_DIGEST_LENGTH)) ||
+	    (block->data.len != NEW_GENESIS.data.len) ||
+	    (memcmp(block->data.buffer, NEW_GENESIS.data.buffer,
+		    NEW_GENESIS.data.len) != 0) ||
+	    (memcmp(block->hash, NEW_GENESIS.hash, SHA256_DIGEST_LENGTH) != 0))
 		return (1);
-	}
-	if (!block->info.index)
-	{
-		return (prev_block || !is_genesis_block(block));
-	}
-	if (!prev_block)
-	{
-		return (1);
-	}
-	if (block->info.index != prev_block->info.index + 1)
-	{
-		return (1);
-	}
-
-	if (block->data.len > BLOCKCHAIN_DATA_MAX)
-	{
-		return (1);
-	}
-	if (!block_hash(block, temp))
-	{
-		return (1);
-	}
-
-	if (memcmp(temp, block->hash, sizeof(temp)))
-	{
-		return (1);
-	}
-	if (!block_hash(prev_block, temp))
-	{
-		return (1);
-	}
-
-	if (memcmp(temp, block->info.prev_hash, sizeof(temp)))
-	{
-		return (1);
-	}
 	return (0);
 }

@@ -21,6 +21,8 @@
 #define MSB 2
 #define HBLK_ENDIAN LSB
 
+
+
 /**
  * struct blockchain_s - Blockchain structure
  * @chain: Linked list of pointers to block_t
@@ -88,6 +90,20 @@ typedef struct block_s
 	uint8_t     hash[SHA256_DIGEST_LENGTH];
 } block_t;
 
+block_t const NEW_GENESIS = { \
+	{ \
+		0, \
+		0, \
+		1537578000, \
+		0, \
+		{0} \
+	}, \
+	{ \
+		GENESIS_STRING, \
+		16 \
+	},
+	GENESIS_HASH \
+}; \
 
 blockchain_t *blockchain_create(void);
 block_t *block_create(block_t const *prev, int8_t const *data, uint32_t data_len);
@@ -100,5 +116,5 @@ void write_attr(int fd, int encoding, void *attr, size_t size);
 int read_attr(int fd, int encoding, void *attr, size_t size);
 blockchain_t *blockchain_deserialize(char const *path);
 int block_is_valid(block_t const *block, block_t const *prev_block);
-
+int is_genesis(block_t const *block)
 #endif /* __BLOCKCHAIN_H__ */
