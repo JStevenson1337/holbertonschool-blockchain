@@ -52,21 +52,21 @@ int block_is_valid(block_t const *block, block_t const *prev_block)
 	{
 		return (1);
 	}
-	if (!block_hash(block, tmp))
+	if (!block_hash(block, temp))
 	{
 		return (1);
 	}
 
-	if (memcmp(tmp, block->hash, sizeof(tmp)))
+	if (memcmp(temp, block->hash, sizeof(temp)))
 	{
 		return (1);
 	}
-	if (!block_hash(prev_block, tmp))
+	if (!block_hash(prev_block, temp))
 	{
 		return (1);
 	}
 
-	if (memcmp(tmp, block->info.prev_hash, sizeof(tmp)))
+	if (memcmp(temp, block->info.prev_hash, sizeof(temp)))
 	{
 		return (1);
 	}
