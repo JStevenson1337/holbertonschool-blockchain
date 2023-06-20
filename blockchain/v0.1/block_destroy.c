@@ -1,5 +1,4 @@
 #include <blockchain.h>
-#include <unistd.h>
 
 /**
  * block_destroy - deletes an existing block

@@ -4,17 +4,19 @@
 
 #define BLOCKCHAIN_DATA_MIN(x, y) ((x) < (y) ? (x) : (y))
 #include <llist.h>
+#include <time.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include "../../crypto/hblk_crypto.h"
+#include "provided/endianness.h"
+
 #define true 1
 #define false 0
 #define GENESIS_DATA "Holberton School"
 #define GENESIS_TIME 1537578000
-#define GENESIS_HASH \
-"\
-\xc5\x2c\x26\xc8\xb5\x46\x16\x39\
-\x63\x5d\x8e\xdf\x2a\x97\xd4\x8d\
-\x0c\x8e\x00\x09\xc8\x17\xf2\xb1\
-\xd3\xd7\xff\x2f\x04\x51\x58\x03"
+#define GENESIS_HASH "\xc5\x2c\x26\xc8\xb5\x46\x16\x39\x63\x5d\x8e\xdf\x2a\
+\x97\xd4\x8d\x0c\x8e\x00\x09\xc8\x17\xf2\xb1\xd3\xd7\xff\x2f\x04\x51\x58\x03"
 #define HBLK_MAGIC "HBLK"
 #define HBLK_VERSION "0.1"
 #define LSB 1

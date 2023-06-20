@@ -1,8 +1,4 @@
-#include <blockchain.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdio.h>
+#include "blockchain.h"
 
 static void bswap(uint8_t *p, size_t size);
 /**
