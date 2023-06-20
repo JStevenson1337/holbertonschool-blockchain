@@ -42,7 +42,7 @@ blockchain_t *blockchain_deserialize(char const *path)
 			!read_attr(fd, encoding, &block->info.nonce,      sizeof(block->info.nonce))      ||
 			!read_attr(fd, encoding,  block->info.prev_hash,  sizeof(block->info.prev_hash))  ||
 			!read_attr(fd, encoding, &block->data.len,        sizeof(block->data.len))        ||
-			!read_attr(fd, encoding,  block->data.bufffer,     block->data.len)                ||
+			!read_attr(fd, encoding,  block->data.buffer,     block->data.len)                ||
 			!read_attr(fd, encoding,  block->hash,            sizeof(block->hash))
 		)
 		{
