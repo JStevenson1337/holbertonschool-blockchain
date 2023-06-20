@@ -1,5 +1,5 @@
 #include "blockchain.h"
-
+static void bswap(uint8_t *p, size_t size);
 /**
  * blockchain_deserialize - deserializes a Blockchain from a file
  * @path: contains the path to a file to load the Blockchain from
