@@ -90,20 +90,6 @@ typedef struct block_s
 	uint8_t     hash[SHA256_DIGEST_LENGTH];
 } block_t;
 
-block_t const NEW_GENESIS = { \
-	{ \
-		0, \
-		0, \
-		1537578000, \
-		0, \
-		{0} \
-	}, \
-	{ \
-		GENESIS_STRING, \
-		16 \
-	},
-	GENESIS_HASH \
-}; \
 
 blockchain_t *blockchain_create(void);
 block_t *block_create(block_t const *prev, int8_t const *data, uint32_t data_len);

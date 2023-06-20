@@ -1,4 +1,19 @@
 #include <blockchain.h>
+
+block_t const NEW_GENESIS = {
+	{
+		0,
+		0,
+		1537578000,
+		0,
+		{0}
+	},
+	{
+		GENESIS_DATA,
+		16
+	},
+	GENESIS_HASH
+};
 /**
  * block_is_valid - verify that a Block is valid
  * @block: block to query
