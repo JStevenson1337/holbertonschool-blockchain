@@ -24,7 +24,8 @@ block_t const NEW_GENESIS = {
  */
 int block_is_valid(block_t const *block, block_t const *prev_block)
 {
-        uint8_t buff[SHA256_DIGEST_LENGTH];
+        uint8_t buff[SHA256_DIGEST_LENGTH] = {0};
+
 
         if (!block || (!prev_block && block->info.index != 0))
                 return (1);
