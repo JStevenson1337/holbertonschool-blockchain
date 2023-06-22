@@ -27,48 +27,40 @@ int block_is_valid(block_t const *block, block_t const *prev_block)
 {
 	uint8_t buff[SHA256_DIGEST_LENGTH];
 
-	if (!block || (!prev_block && block->info.index))
-	{
-		{
-			return (1);
-		}
-	}
+	if (!block)
+		return (1);
 	if (block->info.index == 0)
-		{
-			return (is_genesis(block));
-		}
-	if (block->info.index != prev_block->info.index + 1)
-		{
-			return (1);
-		}
-	block_hash(prev_block, buff);
-	if (memcmp(buff, prev_block->hash, sizeof(buff)) != 0)
-		{
-			return (1);
-		}
-	if (memcmp(prev_block->hash, block->info.prev_hash,
-		   SHA256_DIGEST_LENGTH) != 0)
-		{
-			return (1);
-		}
-	block_hash(block, buff);
-	if (memcmp(buff, block->hash, sizeof(buff)) != 0)
-		{
-			return (1);
-		}
-	if (block->data.len > BLOCKCHAIN_DATA_MAX)
-		{
-			return (1);
-		}
-	return (0);
-}
 
-/**
- * is_genesis - verify if a genesis block
- * @block: pointer to current block
- * Return: 0 if valid | 1 if invalid
- */
-int is_genesis(block_t const *block)
-{
-	return (memcmp(block, &NEW_GENESIS, sizeof(NEW_GENESIS)));
+	{
+		if (block->data.len != NEW_GENESIS.data.len)
+			return (1);
+		if (memcmp(block->data.buffer, NEW_GENESIS.data.buffer,
+			block->data.len))
+			return (1);
+		if (block->info.timestamp != NEW_GENESIS.info.timestamp)
+			return (1);
+		if (block->info.difficulty != NEW_GENESIS.info.difficulty)
+			return (1);
+		if (block->info.nonce != NEW_GENESIS.info.nonce)
+			return (1);
+		if (memcmp(block->info.prev_hash, NEW_GENESIS.info.prev_hash,
+			SHA256_DIGEST_LENGTH))
+			return (1);
+		if (memcmp(block->hash, NEW_GENESIS.hash, SHA256_DIGEST_LENGTH))
+			return (1);
+		return (0);
+	}
+	if (!prev_block)
+		return (1);
+	if (block->info.index != prev_block->info.index + 1)
+		return (1);
+	if (!block_hash(prev_block, buff) ||
+		memcmp(buff, block->info.prev_hash, SHA256_DIGEST_LENGTH))
+		return (1);
+	if (!block_hash(block, buff) ||
+		memcmp(buff, block->hash, SHA256_DIGEST_LENGTH))
+		return (1);
+	if (block->data.len > BLOCKCHAIN_DATA_MAX)
+		return (1);
+	return (0);
 }
