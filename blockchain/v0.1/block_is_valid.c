@@ -25,23 +25,30 @@ block_t const NEW_GENESIS = {
 int block_is_valid(block_t const *block, block_t const *prev_block)
 {
         uint8_t buff[SHA256_DIGEST_LENGTH] = {0};
-	block_t const  genesisBlock = NEW_GENESIS;
+        block_t const  genesisBlock = NEW_GENESIS;
 
         if (!block || (!prev_block && block->info.index != 0))
                 return (1);
+
         if (block->info.index == 0)
-		return (memcmp(block, &genesisBlock, sizeof(genesisBlock)));
+          return (memcmp(block, &genesisBlock, sizeof(genesisBlock)));
+
         if (!prev_block)
                 return (1);
+
         if (block->info.index != prev_block->info.index + 1)
                 return (1);
+
         if (!block_hash(prev_block, buff) ||
                 memcmp(buff, block->info.prev_hash, SHA256_DIGEST_LENGTH))
                 return (1);
+
         if (!block_hash(block, buff) ||
                 memcmp(buff, block->hash, SHA256_DIGEST_LENGTH))
                 return (1);
+
         if (block->data.len > BLOCKCHAIN_DATA_MAX)
                 return (1);
+
         return (0);
 }
