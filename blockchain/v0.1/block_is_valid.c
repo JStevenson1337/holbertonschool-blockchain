@@ -1,19 +1,21 @@
 #include "blockchain.h"
 
+
 block_t const NEW_GENESIS = {
 	{
-		0,
-		0,
-		1537578000,
-		0,
-		{0}
+		0 /* index */,
+		0, /* difficulty */
+		1537578000, /* timestamp */
+		0, /* nonce */
+		{0} /* prev_hash */
 	},
-	{
-		GENESIS_DATA,
-		16
+	{ /* buffer */
+		"Holberton School", /* buffer */
+		16 /* len */
 	},
-	GENESIS_HASH
+	GENESIS_HASH /* hash */
 };
+
 /**
  * block_is_valid - verify that a Block is valid
  * @block: block to query
@@ -68,16 +70,5 @@ int block_is_valid(block_t const *block, block_t const *prev_block)
  */
 int is_genesis(block_t const *block)
 {
-	if ((block->info.index != NEW_GENESIS.info.index) ||
-	    (block->info.difficulty != NEW_GENESIS.info.difficulty) ||
-	    (block->info.timestamp != NEW_GENESIS.info.timestamp) ||
-	    (block->info.nonce != NEW_GENESIS.info.nonce) ||
-	    (memcmp(block->info.prev_hash, NEW_GENESIS.info.prev_hash,
-		    SHA256_DIGEST_LENGTH)) ||
-	    (block->data.len != NEW_GENESIS.data.len) ||
-	    (memcmp(block->data.buffer, NEW_GENESIS.data.buffer,
-		    NEW_GENESIS.data.len) != 0) ||
-	    (memcmp(block->hash, NEW_GENESIS.hash, SHA256_DIGEST_LENGTH) != 0))
-		return (1);
-	return (0);
+	return (memcmp(block, &NEW_GENESIS, sizeof(NEW_GENESIS)));
 }
