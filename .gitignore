@@ -1,1 +1,5 @@
 blockchain/v0.1.old
+blockchain/v0.1/#block_create.c#
+blockchain/v0.1/#blockchain_create.c#
+blockchain/v0.1/blockchain.h.gch
+blockchain/v0.1/blockchain_destroy.c~

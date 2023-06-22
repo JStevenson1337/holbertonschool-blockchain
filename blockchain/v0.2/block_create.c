@@ -5,7 +5,7 @@
 *
 * @prev: pointer to the previous block
 * @data: pointer to data to copy
-* @data_len: length of data not exceeding BLOCKCHAIN_DATA_MAX
+* @data_len: lenght of data not exceeding BLOCKCHAIN_DATA_MAX
 *
 * Return: pointer to the block || NULL
 */
