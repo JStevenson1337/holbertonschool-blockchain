@@ -18,7 +18,7 @@
 #define GENESIS_HASH "\xc5\x2c\x26\xc8\xb5\x46\x16\x39\x63\x5d\x8e\xdf\x2a\
 \x97\xd4\x8d\x0c\x8e\x00\x09\xc8\x17\xf2\xb1\xd3\xd7\xff\x2f\x04\x51\x58\x03"
 #define HBLK_MAGIC "HBLK"
-#define HBLK_VERSION "0.1"
+#define HBLK_VERSION "0.2"
 #define LSB 1
 #define MSB 2
 #define HBLK_ENDIAN LSB
@@ -78,6 +78,7 @@ typedef struct block_data_s
         uint32_t    len;
 } block_data_t;
 
+
 /**
  * struct block_s - Block structure
  *
@@ -103,13 +104,8 @@ void serialize_blocks(int fd, int encoding, llist_t *list);
 void write_attr(int fd, int encoding, void *attr, size_t size);
 int read_attr(int fd, int encoding, void *attr, size_t size);
 blockchain_t *blockchain_deserialize(char const *path);
-
+int hash_matches_difficulty(uint8_t const hash[SHA256_DIGEST_LENGTH], uint32_t 
+difficulty);
 int block_is_valid(block_t const *block, block_t const *prev_block);
 int is_genesis(block_t const *block);
-
-/* Block Mining */
-int hash_matches_difficulty(uint8_t const hash[SHA256_DIGEST_LENGTH], uint32_t difficulty);
-void block_mine(block_t *block);
-uint32_t blockchain_difficulty(blockchain_t const *blockchain);
-
 #endif /* __BLOCKCHAIN_H__ */

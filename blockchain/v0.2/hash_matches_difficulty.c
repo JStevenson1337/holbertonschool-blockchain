@@ -8,6 +8,7 @@
  *
  * Return: 1 if hash matches difficulty, otherwise 0
  */
+
 int hash_matches_difficulty(uint8_t const hash[SHA256_DIGEST_LENGTH], uint32_t difficulty)
 {
         uint32_t i, bit, bits;
@@ -31,4 +32,6 @@ int hash_matches_difficulty(uint8_t const hash[SHA256_DIGEST_LENGTH], uint32_t d
 
                 bit >>= 1;
         }
+
+        return (1);
 }

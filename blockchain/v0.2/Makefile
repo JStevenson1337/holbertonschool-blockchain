@@ -1,4 +1,3 @@
-
 CC = gcc
 FLAGS = -Wall -Wextra -Werror -pedantic -I. -L../../crypto -lhblk_crypto -lllist -lssl -lcrypto -pthread -Wno-deprecated-declarations
 OBJ = blockchain_create.o block_create.o block_destroy.o blockchain_destroy.o block_hash.o blockchain_serialize.o blockchain_deserialize.o block_is_valid.o
