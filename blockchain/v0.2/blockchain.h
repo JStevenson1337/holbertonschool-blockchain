@@ -1,7 +1,9 @@
 #ifndef __BLOCKCHAIN_H__
 #define __BLOCKCHAIN_H__
 
-
+#define BLOCKCHAIN_DATA_MAX 1024
+#define BLOCK_GENERATION_INTERVAL 1
+#define DIFFICULTY_ADJUSTMENT_INTERVAL 5
 #define BLOCKCHAIN_DATA_MIN(x, y) ((x) < (y) ? (x) : (y))
 #include <stdint.h>
 #include <stdlib.h>
