@@ -1,94 +1,84 @@
 #include "blockchain.h"
-static void bswap(uint8_t *p, size_t size);
+
+#define CLEAN_UP (free(chain), close(fd))
+#define CLEAN_UP_BLOCKS (free(block), llist_destroy(list, 1, NULL))
+#define CHECK_ENDIAN(x) (endianness ? SWAPENDIAN(x) : (void)0)
 /**
- * blockchain_deserialize - deserializes a Blockchain from a file
- * @path: contains the path to a file to load the Blockchain from
- *     * return NULL if file doesn’t exist or we don't permission to open
- * Return: pointer to deserialized Blockchain, or NULL upon failure
- **/
+ * blockchain_deserialize - deserializes blockchain from file
+ * @path: path to serialized blockchain file
+ * Return: pointer to deserialized blockchain or null
+ */
 blockchain_t *blockchain_deserialize(char const *path)
 {
-	int fd = open(path, O_RDONLY);
-	unsigned char buff[sizeof(block_t)];
-	uint8_t encoding;
-	uint32_t num_blocks;
-	blockchain_t *blockchain;
-	block_t *block;
+	int fd;
+	blockchain_t *chain = NULL;
+	uint8_t endianness;
+	char buf[4096] = {0};
+	uint32_t size;
 
+	if (!path)
+		return (NULL);
+	fd = open(path, O_RDONLY);
 	if (fd == -1)
 		return (NULL);
+	if (read(fd, buf, strlen(HBLK_MAGIC)) != strlen(HBLK_MAGIC) ||
+		strcmp(buf, HBLK_MAGIC))
+		return (CLEAN_UP, NULL);
+	buf[strlen(HBLK_VERSION)] = 0;
+	if (read(fd, buf, strlen(HBLK_VERSION)) != strlen(HBLK_VERSION) ||
+		strcmp(buf, HBLK_VERSION))
+		return (CLEAN_UP, NULL);
+	chain = calloc(1, sizeof(*chain));
+	if (!chain)
+		return (CLEAN_UP, NULL);
+	if (read(fd, &endianness, 1) != 1)
+		return (CLEAN_UP, NULL);
+	endianness = endianness != _get_endianness();
+	if (read(fd, &size, 4) != 4)
+		return (CLEAN_UP, NULL);
+	CHECK_ENDIAN(size);
+	chain->chain = deserialize_blocks(fd, size, endianness);
+	if (!chain)
+		return (CLEAN_UP, NULL);
+	return (close(fd), chain);
+}
 
-	if (
-		read(fd, buff, sizeof(HBLK_MAGIC) - 1) < (ssize_t)sizeof(HBLK_MAGIC) - 1   ||
-		memcmp(buff, HBLK_MAGIC, sizeof(HBLK_MAGIC) - 1)                  ||
-		read(fd, buff, sizeof(HBLK_VERSION) - 1) < (ssize_t)sizeof(HBLK_VERSION) - 1 ||
-		!(blockchain = blockchain_create())
-	)
-	{
-		close(fd);
+/**
+ * deserialize_blocks - deserializes all the blocks in the file
+ * @fd: open fd to save file
+ * @size: number of blocks in the file
+ * @endianness: if endianess needs switching
+ * Return: pointer to list of blocks or NULL
+ */
+llist_t *deserialize_blocks(int fd, uint32_t size, uint8_t endianness)
+{
+	block_t *block;
+	llist_t *list = llist_create(MT_SUPPORT_TRUE);
+	uint32_t i = 0;
+
+	if (!list)
 		return (NULL);
-	}
-
-	block_destroy((block_t *)llist_pop(blockchain->chain));
-	read(fd, &encoding, sizeof(encoding));
-	read_attr(fd, encoding, &num_blocks, sizeof(num_blocks));
-	while (num_blocks--)
+	for (i = 0; i < size; i++)
 	{
-		block = calloc(1, sizeof(block_t));
-		if (
-			!read_attr(fd, encoding, &block->info.index,      sizeof(block->info.index))      ||
-			!read_attr(fd, encoding, &block->info.difficulty, sizeof(block->info.difficulty)) ||
-			!read_attr(fd, encoding, &block->info.timestamp,  sizeof(block->info.timestamp))  ||
-			!read_attr(fd, encoding, &block->info.nonce,      sizeof(block->info.nonce))      ||
-			!read_attr(fd, encoding,  block->info.prev_hash,  sizeof(block->info.prev_hash))  ||
-			!read_attr(fd, encoding, &block->data.len,        sizeof(block->data.len))        ||
-			!read_attr(fd, encoding,  block->data.buffer,     block->data.len)                ||
-			!read_attr(fd, encoding,  block->hash,            sizeof(block->hash))
-		)
-		{
-			llist_destroy(blockchain->chain, true, (node_dtor_t)block_destroy);
-			free(blockchain);
-			close(fd);
-			return (NULL);
-		}
-		llist_add_node(blockchain->chain, block, ADD_NODE_REAR);
+		block = calloc(1, sizeof(*block));
+		if (!block)
+			return (CLEAN_UP_BLOCKS, NULL);
+		if (read(fd, &(block->info), sizeof(block->info)) != sizeof(block->info))
+			return (CLEAN_UP_BLOCKS, NULL);
+		CHECK_ENDIAN(block->info.index);
+		CHECK_ENDIAN(block->info.difficulty);
+		CHECK_ENDIAN(block->info.timestamp);
+		CHECK_ENDIAN(block->info.nonce);
+		if (read(fd, &(block->data.len), 4) != 4)
+			return (CLEAN_UP_BLOCKS, NULL);
+		CHECK_ENDIAN(block->data.len);
+		if (read(fd, block->data.buffer, block->data.len) != block->data.len)
+			return (CLEAN_UP_BLOCKS, NULL);
+		if (read(fd, block->hash, SHA256_DIGEST_LENGTH) !=
+			SHA256_DIGEST_LENGTH)
+			return (CLEAN_UP_BLOCKS, NULL);
+		if (llist_add_node(list, block, ADD_NODE_REAR))
+			return (CLEAN_UP_BLOCKS, NULL);
 	}
-	close(fd);
-	return (blockchain);
-}
-
-/**
- * read_attr - reads an ELF file attribute from an ELF file
- * @fd: file descriptor
- * @encoding: encoding of attribute
- * @attr: pointer to attribute where value will be stored
- * @size: size of attribute
- * Return: 1 on success | 0 on failure
- **/
-int read_attr(int fd, int encoding, void *attr, size_t size)
-{
-	if (read(fd, attr, size) != (ssize_t)size)
-		return (0);
-
-	if (encoding == MSB)
-		bswap((uint8_t *)attr, size);
-
-	return (1);
-}
-
-/**
- * bswap - byte swap
- * @p: pointer to data
- * @size: data size
- **/
-static void bswap(uint8_t *p, size_t size)
-{
-	uint8_t buff[64] = {0};
-	int i;
-
-	for (i = size - 1; i >= 0; i--)
-		buff[size - i - 1] = p[i];
-
-	for (i = 0; i < (int)size; i++)
-		p[i] = buff[i];
+	return (list);
 }

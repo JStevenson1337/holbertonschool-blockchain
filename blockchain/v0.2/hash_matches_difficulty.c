@@ -1,37 +1,38 @@
 #include "blockchain.h"
+
 /**
- *
- * hash_matches_difficulty - Check if a hash matches the mining difficulty
- *
- * @hash: Hash to check
- * @difficulty: Difficulty to match
- *
- * Return: 1 if hash matches difficulty, otherwise 0
+ * get_difficulty - computers number of leading bits in hash
+ * @hash: hash buffer
+ * Return: computed difficulty
  */
-
-int hash_matches_difficulty(uint8_t const hash[SHA256_DIGEST_LENGTH], uint32_t difficulty)
+uint32_t get_difficulty(uint8_t const hash[SHA256_DIGEST_LENGTH])
 {
-        uint32_t i, bit, bits;
+	uint8_t *ptr = (uint8_t *)hash;
+	uint32_t difficulty = 0;
+	int i;
 
-        for (i = 0; i < difficulty / 8; i++)
-        {
-                if (hash[i] != 0)
-                        return (0);
-        }
+	for (; ptr < hash + SHA256_DIGEST_LENGTH; ptr++)
+	{
+		for (i = 7; i >= 0; i--)
+		{
+			if ((*ptr >> i) & 1)
+				return (difficulty);
+			difficulty++;
+		}
+	}
+	return (difficulty);
+}
 
-        if (difficulty % 8 == 0)
-                return (1);
-
-        bit = 128;
-        bits = difficulty % 8;
-
-        while (bits--)
-        {
-                if (!(hash[i] & bit))
-                        return (0);
-
-                bit >>= 1;
-        }
-
-        return (1);
+/**
+ * hash_matches_difficulty - determines if hash matches difficulty
+ * @hash: hash buffer
+ * @difficulty: difficulty to match
+ * Return: 1 if matches else 0
+ */
+int hash_matches_difficulty(uint8_t const hash[SHA256_DIGEST_LENGTH],
+	uint32_t difficulty)
+{
+	if (!hash)
+		return (0);
+	return (get_difficulty(hash) >= difficulty);
 }
