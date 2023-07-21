@@ -1,84 +1,126 @@
 #include "blockchain.h"
 
-#define CLEAN_UP (free(chain), close(fd))
-#define CLEAN_UP_BLOCKS (free(block), llist_destroy(list, 1, NULL))
-#define CHECK_ENDIAN(x) (endianness ? SWAPENDIAN(x) : (void)0)
+int check_header(block_header_t *);
+void read_transactions(block_t *block, FILE *file);
+
 /**
- * blockchain_deserialize - deserializes blockchain from file
- * @path: path to serialized blockchain file
- * Return: pointer to deserialized blockchain or null
- */
+* blockchain_deserialize - loads a blockchain to file
+* @path: file target
+*
+* Return: pointer to new blockchain, else NULL
+*/
 blockchain_t *blockchain_deserialize(char const *path)
 {
-	int fd;
-	blockchain_t *chain = NULL;
-	uint8_t endianness;
-	char buf[4096] = {0};
-	uint32_t size;
+	FILE *file = NULL;
+	uint32_t i;
+	block_t *block;
+	block_header_t header;
+	blockchain_t *out;
+	unspent_tx_out_t *u_token;
 
-	if (!path)
+	file = fopen(path, "rb");
+	if (!file)
 		return (NULL);
-	fd = open(path, O_RDONLY);
-	if (fd == -1)
+
+	fread(&header, sizeof(header), 1, file);
+	if (!check_header(&header))
 		return (NULL);
-	if (read(fd, buf, strlen(HBLK_MAGIC)) != strlen(HBLK_MAGIC) ||
-		strcmp(buf, HBLK_MAGIC))
-		return (CLEAN_UP, NULL);
-	buf[strlen(HBLK_VERSION)] = 0;
-	if (read(fd, buf, strlen(HBLK_VERSION)) != strlen(HBLK_VERSION) ||
-		strcmp(buf, HBLK_VERSION))
-		return (CLEAN_UP, NULL);
-	chain = calloc(1, sizeof(*chain));
-	if (!chain)
-		return (CLEAN_UP, NULL);
-	if (read(fd, &endianness, 1) != 1)
-		return (CLEAN_UP, NULL);
-	endianness = endianness != _get_endianness();
-	if (read(fd, &size, 4) != 4)
-		return (CLEAN_UP, NULL);
-	CHECK_ENDIAN(size);
-	chain->chain = deserialize_blocks(fd, size, endianness);
-	if (!chain)
-		return (CLEAN_UP, NULL);
-	return (close(fd), chain);
+
+	if (header.blocks == 0)
+	{
+		fclose(file);
+		return (NULL);
+	}
+
+	out = malloc(sizeof(blockchain_t));
+	out->chain = llist_create(MT_SUPPORT_FALSE);
+	out->unspent = llist_create(MT_SUPPORT_FALSE);
+	for (i = 0; i < header.blocks; i++)
+	{
+		block = malloc(sizeof(block_t));
+		fread(block, 56, 1, file);
+		fread(&block->data.len, 4, 1, file);
+		memset(block->data.buffer, 0, sizeof(block->data.buffer));
+		fread(&block->data.buffer, block->data.len, 1, file);
+		fread(&block->hash, 32, 1, file);
+		read_transactions(block, file);
+		llist_add_node(out->chain, block, ADD_NODE_REAR);
+	}
+	for (i = 0; i < header.unspent; i++)
+	{
+		u_token = malloc(sizeof(unspent_tx_out_t));
+		fread(u_token, 165, 1, file);
+		llist_add_node(out->unspent, u_token, ADD_NODE_REAR);
+	}
+	fclose(file);
+	return (out);
 }
 
 /**
- * deserialize_blocks - deserializes all the blocks in the file
- * @fd: open fd to save file
- * @size: number of blocks in the file
- * @endianness: if endianess needs switching
- * Return: pointer to list of blocks or NULL
- */
-llist_t *deserialize_blocks(int fd, uint32_t size, uint8_t endianness)
+* read_transactions - reads transactions from file
+* @block: block for transactions to be read into
+* @file: open file pointer
+*/
+void read_transactions(block_t *block, FILE *file)
 {
-	block_t *block;
-	llist_t *list = llist_create(MT_SUPPORT_TRUE);
-	uint32_t i = 0;
+	int i, j, num_in, num_out, t_size;
+	transaction_t *t_token;
+	tx_in_t *i_token;
+	tx_out_t *o_token;
 
-	if (!list)
-		return (NULL);
-	for (i = 0; i < size; i++)
+	fread(&t_size, 4, 1, file);
+	if (t_size == -1)
 	{
-		block = calloc(1, sizeof(*block));
-		if (!block)
-			return (CLEAN_UP_BLOCKS, NULL);
-		if (read(fd, &(block->info), sizeof(block->info)) != sizeof(block->info))
-			return (CLEAN_UP_BLOCKS, NULL);
-		CHECK_ENDIAN(block->info.index);
-		CHECK_ENDIAN(block->info.difficulty);
-		CHECK_ENDIAN(block->info.timestamp);
-		CHECK_ENDIAN(block->info.nonce);
-		if (read(fd, &(block->data.len), 4) != 4)
-			return (CLEAN_UP_BLOCKS, NULL);
-		CHECK_ENDIAN(block->data.len);
-		if (read(fd, block->data.buffer, block->data.len) != block->data.len)
-			return (CLEAN_UP_BLOCKS, NULL);
-		if (read(fd, block->hash, SHA256_DIGEST_LENGTH) !=
-			SHA256_DIGEST_LENGTH)
-			return (CLEAN_UP_BLOCKS, NULL);
-		if (llist_add_node(list, block, ADD_NODE_REAR))
-			return (CLEAN_UP_BLOCKS, NULL);
+		block->transactions = NULL;
+		return;
 	}
-	return (list);
+	block->transactions = llist_create(MT_SUPPORT_FALSE);
+	for (i = 0; i < t_size; i++)
+	{
+		t_token = malloc(sizeof(transaction_t));
+		fread(t_token, 32, 1, file);
+		fread(&num_in, 4, 1, file);
+		fread(&num_out, 4, 1, file);
+		t_token->inputs = llist_create(MT_SUPPORT_FALSE);
+		for (j = 0; j < num_in; j++)
+		{
+			i_token = malloc(sizeof(tx_in_t));
+			fread(i_token, 169, 1, file);
+			llist_add_node(t_token->inputs, i_token, ADD_NODE_REAR);
+		}
+		t_token->outputs = llist_create(MT_SUPPORT_FALSE);
+		for (j = 0; j < num_out; j++)
+		{
+			o_token = malloc(sizeof(tx_out_t));
+			fread(o_token, 101, 1, file);
+			llist_add_node(t_token->outputs, o_token, ADD_NODE_REAR);
+		}
+		llist_add_node(block->transactions, t_token, ADD_NODE_REAR);
+	}
+}
+
+/**
+* check_header - determines if a header is valid
+* @header: header to check
+*
+* Return: 1 on success, else 0
+*/
+int check_header(block_header_t *header)
+{
+	if (header->magic[0] != 'H')
+		return (0);
+	if (header->magic[1] != 'B')
+		return (0);
+	if (header->magic[2] != 'L')
+		return (0);
+	if (header->magic[3] != 'K')
+		return (0);
+	if (header->version[0] != '0')
+		return (0);
+	if (header->version[1] != '.')
+		return (0);
+	if (header->version[2] != '3')
+		return (0);
+
+	return (1);
 }

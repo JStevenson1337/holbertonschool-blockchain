@@ -1,3 +1,21 @@
+/*
+ *==========================================================================
+ *
+ *       Filename:  block_hash.c
+ *
+ *    Description:  Construct the block hash
+ *
+ *        Version:  1.0
+ *        Created:  11/01/2021 09:11:08 PM
+ *       Revision:  none
+ *       Compiler:  gcc
+ *
+ *         Author:  David Orejuela
+ *   Organization:  Holberton
+ *
+ *=========================================================================
+ */
+
 #include "blockchain.h"
 
 /**

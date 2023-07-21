@@ -1,9 +1,6 @@
 #ifndef BLOCKCHAIN_H
 #define BLOCKCHAIN_H
 
-#include "../../crypto/hblk_crypto.h"
-#include "provided/endianness.h"
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -18,21 +15,30 @@
 
 #include <openssl/sha.h>
 
+#include "../../crypto/hblk_crypto.h"
+#include "provided/endianness.h"
+#include "transaction/transaction.h"
+
+
+
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 
 #define HBLK_MAGIC "HBLK"
-#define HBLK_VERSION "0.2"
+#define HBLK_VERSION "0.3"
+
+#define COINBASE_AMOUNT 50
 
 /**
  * struct blockchain_s - Blockchain structure
  *
- * @chain: Linked list of pointers to block_t
+ * @chain: Linked list of Blocks
+ * @unspent: Linked list of unspent transaction outputs
  */
 typedef struct blockchain_s
 {
-	llist_t	 *chain;
+	llist_t	*chain;
+	llist_t	*unspent;
 } blockchain_t;
-
 
 /**
  * struct block_info_s - Block info structure
@@ -67,7 +73,7 @@ typedef struct block_info_s
  * struct block_data_s - Block data
  *
  * @buffer: Data buffer
- * @len:	Data size (in bytes)
+ * @len: Data size (in bytes)
  */
 typedef struct block_data_s
 {
@@ -84,14 +90,35 @@ typedef struct block_data_s
  *
  * @info: Block info
  * @data: Block data
+ * @transactions: linked list of transaction ids
  * @hash: 256-bit digest of the Block, to ensure authenticity
  */
 typedef struct block_s
 {
 	block_info_t	info; /* This must stay first */
 	block_data_t	data; /* This must stay second */
+	llist_t *transactions;
 	uint8_t	 hash[SHA256_DIGEST_LENGTH];
 } block_t;
+
+
+/**
+* struct block_header_s - used for blockchain I/O
+*
+* @magic: identifies file as blockchain
+* @version: version of blockchain
+* @endian: 1 or 2 for little or big endian
+* @blocks: number of blocks in blockchain
+* @unspent: number of unspent transactions in the blockchain
+*/
+typedef struct block_header_s
+{
+	unsigned char magic[4];
+	unsigned char version[3];
+	unsigned char endian;
+	uint32_t blocks;
+	uint32_t unspent;
+} block_header_t;
 
 /* GENESIS BLOCK - first block in the chain */
 #define GENESIS_BLOCK { \
@@ -106,6 +133,7 @@ typedef struct block_s
 		"Holberton School", /* buffer */ \
 		16 /* len */ \
 	}, \
+	NULL, /* transactions */ \
 	"\xc5\x2c\x26\xc8\xb5\x46\x16\x39\x63\x5d\x8e\xdf\x2a\x97\xd4\x8d" \
 	"\x0c\x8e\x00\x09\xc8\x17\xf2\xb1\xd3\xd7\xff\x2f\x04\x51\x58\x03" \
 }
@@ -120,8 +148,8 @@ uint8_t *block_hash(block_t const *block,
 int blockchain_serialize(blockchain_t const *blockchain, char const *path);
 blockchain_t *blockchain_deserialize(char const *path);
 llist_t *deserialize_blocks(int fd, uint32_t size, uint8_t endianness);
-int block_is_valid(block_t const *block, block_t const *prev_block);
-
+int block_is_valid(block_t const *block, block_t const *prev_block,
+	llist_t *all_unspent);
 int hash_matches_difficulty(uint8_t const hash[SHA256_DIGEST_LENGTH],
 	uint32_t difficulty);
 void block_mine(block_t *block);
